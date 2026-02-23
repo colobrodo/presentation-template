@@ -2,7 +2,7 @@
 
 # Render IPE images to SVG
 pushd images
-./render.sh "$@"
+./render "$@"
 popd
 
 # Auto-discover all .bib files and create bibliography arguments

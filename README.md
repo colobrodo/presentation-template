@@ -8,12 +8,12 @@ This template also include some tools to generate qr-codes and to render the pre
 ```
 presentation-template/
 ├── presentation.md      # Main presentation content
-├── build.sh             # Build script (pandoc + image rendering)
+├── build                # Build script (pandoc + image rendering)
 ├── style.css            # Reveal.js styling
 ├── images/
-│   └── render.sh        # IPE image rendering script
+│   └── render           # IPE image rendering script
 └── tools/
-    └── render-pdf.sh    # PDF export tool
+    └── render-pdf       # PDF export tool
 ```
 
 ## Usage
@@ -21,7 +21,7 @@ presentation-template/
 ### Build HTML presentation
 
 ```bash
-./build.sh
+./build
 ```
 
 This script will:
@@ -32,7 +32,7 @@ This script will:
 ### Export to PDF
 
 ```bash
-./tools/render-pdf.sh
+./tools/render-pdf
 ```
 
 You can use the `--last-frame` option to render the full slides without reveals
