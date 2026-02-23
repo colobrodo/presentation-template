@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Render IPE images to SVG
+pushd images
+./render.sh "$@"
+popd
+
+# Auto-discover all .bib files and create bibliography arguments
+bib_args=""
+for bibfile in *.bib; do
+    if [ -f "$bibfile" ]; then
+        bib_args="$bib_args --bibliography=$bibfile"
+    fi
+done
+
+# Build presentation with pandoc
+pandoc -s --mathml -i -t revealjs --embed-resources --standalone --citeproc $bib_args --csl=/usr/share/texlive/texmf-dist/tex/latex/citation-style-language/styles/ieee.csl presentation.md -o presentation.html

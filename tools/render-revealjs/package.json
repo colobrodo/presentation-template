@@ -1,0 +1,15 @@
+{
+  "name": "revealjs-to-pdf",
+  "version": "1.0.0",
+  "description": "Convert Reveal.js presentations to PDF using screenshots",
+  "main": "render-revealjs.js",
+  "type": "module",
+  "scripts": {
+    "start": "node render-revealjs.js"
+  },
+  "dependencies": {
+    "cli-progress": "^3.12.0",
+    "pdf-lib": "^1.17.1",
+    "puppeteer": "^22.0.0"
+  }
+}

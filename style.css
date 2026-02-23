@@ -1,0 +1,73 @@
+/* Reveal.js base customization */
+:root {
+    --r-heading1-size: 1.5em;
+}
+
+/* Title slide styling */
+section#title-slide {
+    text-align: left;
+    width: 80%;
+    position: relative;
+}
+
+section#title-slide::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    background: linear-gradient(to right, rgba(255,255,255,1), rgba(255, 255, 255, 1) 90%, rgba(255, 255, 255, 0.7) 95%, rgba(255,255,255,0) 100%);
+}
+
+section#title-slide > * {
+    position: relative;
+    z-index: 2;
+}
+
+/* Logo container for title slide */
+.logo-container {
+    display: flex; 
+    align-items: center;
+}
+
+.logo {
+    display: inline-block;
+    border: none; 
+    box-shadow: none; 
+    width: 250px; 
+    margin-top: 20px;
+}
+
+/* Author styling - first author is bold */
+#title-slide > .author {
+    font-weight: bold;
+}
+
+#title-slide > .author ~ .author {
+    font-weight: normal;
+}
+
+p.author {
+   display: inline-block;
+   margin-right: 2em;
+   margin-bottom: 0.1em;
+}
+
+/* Email and date styling */
+#myemail {
+    margin: 0;
+    font-size: x-large;
+}
+
+.date {
+   color: gray;
+   text-align: center;
+}
+
+/* References section */
+#refs {
+    font-size: x-large;
+}
