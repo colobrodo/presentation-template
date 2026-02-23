@@ -18,12 +18,18 @@ fi
 
 # Default port (can be overridden with --port)
 port=8080
+# Default output path
+output="presentation.pdf"
 
-# Parse optional port argument
+# Parse optional arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
         --port)
             port="$2"
+            shift 2
+            ;;
+        --output|-o)
+            output="$2"
             shift 2
             ;;
         *)
@@ -54,8 +60,8 @@ trap cleanup EXIT
 sleep 1
 
 # Run render-revealjs
-echo "Rendering presentation to PDF..." >&2
-node "$RENDER_TOOL" "$@" http://localhost:$port/presentation.html presentation.pdf
+echo "Rendering presentation to PDF ($output)..." >&2
+node "$RENDER_TOOL" "$@" http://localhost:$port/presentation.html "$output"
 
 echo "Done!" >&2
 
