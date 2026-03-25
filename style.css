@@ -27,6 +27,13 @@ section#title-slide > * {
     z-index: 2;
 }
 
+/**
+ * Some images are very large and we want them to fit the screen as much as possible
+ */
+img.image-large {
+   max-width: 110%;
+}
+
 /* Logo container for title slide */
 .logo-container {
     display: flex; 
