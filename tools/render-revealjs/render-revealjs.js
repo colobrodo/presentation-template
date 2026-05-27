@@ -3,6 +3,7 @@
 import puppeteer from 'puppeteer';
 import { PDFDocument } from 'pdf-lib';
 import fs from 'fs/promises';
+import path from 'path';
 import cliProgress from 'cli-progress';
 import { assert } from 'console';
 
@@ -128,6 +129,7 @@ function parseArgs(args) {
     height: null,
     lastFrame: false,
     slides: null,
+    png: false,
     help: false,
     success: false,
   };
@@ -149,6 +151,8 @@ function parseArgs(args) {
       result.slides = args[++i];
     } else if (arg === '--last-frame') {
       result.lastFrame = true;
+    } else if (arg === '--png') {
+      result.png = true;
     } else if (!result.url) {
       result.url = arg;
     } else if (!result.output) {
@@ -186,8 +190,8 @@ function calculateDimensions(width, height) {
  * Renders a Reveal.js presentation to PDF by taking screenshots of each slide
  * and each fragment state (pauses/incremental reveals)
  */
-async function renderRevealJsToPdf(url, outputPath, viewportWidth, viewportHeight, lastFrame = false, selector = null) {
-  log(`Starting Reveal.js to PDF conversion...`);
+async function renderRevealJsToPdf(url, outputPath, viewportWidth, viewportHeight, lastFrame = false, selector = null, png = false) {
+  log(`Starting Reveal.js to ${png ? 'PNG' : 'PDF'} conversion...`);
   log(`URL: ${url}`);
   log(`Output: ${outputPath}`);
   log(`Resolution: ${viewportWidth}x${viewportHeight}`);
@@ -301,7 +305,11 @@ async function renderRevealJsToPdf(url, outputPath, viewportWidth, viewportHeigh
     totalStates
   });
 
-  const screenshots = [];
+  if (png) {
+    await fs.mkdir(outputPath, { recursive: true });
+  }
+
+  const screenshots = png ? null : [];
   let stateIndex = 0;
   let slideRenderedCount = 0;
 
@@ -316,6 +324,7 @@ async function renderRevealJsToPdf(url, outputPath, viewportWidth, viewportHeigh
     const maxFrame = 1 + fragmentCount;
     const frameFrom = Math.max(1, range.frameFrom);
     const frameTo = Math.min(maxFrame, range.frameTo);
+    const frameCount = frameTo - frameFrom + 1;
 
     for (let frameNum = frameFrom; frameNum <= frameTo; frameNum++) {
       // Frame 1 = initial state (fragment index -1), frame k = fragment index k-2
@@ -343,35 +352,43 @@ async function renderRevealJsToPdf(url, outputPath, viewportWidth, viewportHeigh
         type: 'png',
         fullPage: false
       });
-      screenshots.push(screenshot);
+      if (png) {
+        const filename = (lastFrame || frameCount === 1) ? `${slideNum}.png` : `${slideNum}-${frameNum}.png`;
+        await fs.writeFile(path.join(outputPath, filename), screenshot);
+      } else {
+        screenshots.push(screenshot);
+      }
     }
   }
 
   progressBar.stop();
-  log(`\nAll ${screenshots.length} frames captured. Generating PDF...`);
 
-  // Create PDF from screenshots
-  const pdfDoc = await PDFDocument.create();
+  if (png) {
+    log(`\nAll ${stateIndex} frames saved to: ${outputPath}`);
+  } else {
+    log(`\nAll ${screenshots.length} frames captured. Generating PDF...`);
 
-  for (let i = 0; i < screenshots.length; i++) {
-    const screenshot = screenshots[i];
-    const pngImage = await pdfDoc.embedPng(screenshot);
+    const pdfDoc = await PDFDocument.create();
 
-    const pdfPage = pdfDoc.addPage([viewportWidth, viewportHeight]);
+    for (let i = 0; i < screenshots.length; i++) {
+      const screenshot = screenshots[i];
+      const pngImage = await pdfDoc.embedPng(screenshot);
 
-    pdfPage.drawImage(pngImage, {
-      x: 0,
-      y: 0,
-      width: viewportWidth,
-      height: viewportHeight
-    });
+      const pdfPage = pdfDoc.addPage([viewportWidth, viewportHeight]);
+
+      pdfPage.drawImage(pngImage, {
+        x: 0,
+        y: 0,
+        width: viewportWidth,
+        height: viewportHeight
+      });
+    }
+
+    const pdfBytes = await pdfDoc.save();
+    await fs.writeFile(outputPath, pdfBytes);
+
+    log(`PDF saved to: ${outputPath}`);
   }
-
-  // Save PDF
-  const pdfBytes = await pdfDoc.save();
-  await fs.writeFile(outputPath, pdfBytes);
-
-  log(`PDF saved to: ${outputPath}`);
 
   await browser.close();
 
@@ -406,6 +423,8 @@ Options:
   -o, --output <path>   Output PDF file path
   -s, --slides <sel>    Render only specified slides/frames (see Slide Selector below)
   --last-frame          Render only the last frame of each slide, skipping fragment animations
+  --png                 Save slides as PNG images; output must be a directory
+                        Named {slide}-{frame}.png for multi-frame slides, {slide}.png for single-frame slides or --last-frame
   -h, --help            Show this help message
 
 Resolution:
@@ -487,7 +506,7 @@ async function main() {
   }
 
   try {
-    await renderRevealJsToPdf(options.url, options.output, width, height, options.lastFrame, selector);
+    await renderRevealJsToPdf(options.url, options.output, width, height, options.lastFrame, selector, options.png);
     log(`\nConversion completed successfully!`);
   } catch (error) {
     log(`\nError during conversion: ${error.message}`);
