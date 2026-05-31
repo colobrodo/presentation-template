@@ -3,6 +3,16 @@
     --r-heading1-size: 1.5em;
 }
 
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5,
+.reveal h6,
+.reveal p {
+   font-family: 'Open Sans', sans-serif, 
+}
+
 /* Title slide styling */
 section#title-slide {
     text-align: left;
