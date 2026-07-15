@@ -14,7 +14,7 @@ A self-contained template for building Reveal.js presentations from Markdown via
 ./build
 ```
 
-Renders any IPE images in `images/` to SVG (skipping up-to-date ones), then calls pandoc to produce `presentation.html`. Picks up all `.bib` files in the root directory automatically for citations.
+Renders any IPE images in `images/` to SVG (skipping up-to-date ones), then calls pandoc to produce `presentation.html`. Picks up all `.bib` files in the root directory automatically for citations. By default all the resources are not included in the html presentation to speedup the compilation process, but to ensure a presentation fully functional even offline the final html should be compiled including all the assets in it using the flag `--embed-resources`.
 
 ### Export to PDF
 

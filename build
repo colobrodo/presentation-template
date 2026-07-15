@@ -1,8 +1,24 @@
-#!/bin/bash
+#! /bin/bash
 
-# Render IPE images to SVG
+EMBED=false
+render_args=()
+
+# Parse arguments: consume --embed here, forward the rest to images/render.sh
+while [[ $# -gt 0 ]]; do
+	case $1 in
+		--embed)
+			EMBED=true
+			shift
+			;;
+		*)
+			render_args+=("$1")
+			shift
+			;;
+	esac
+done
+
 pushd images
-./render "$@"
+./render "${render_args[@]}"
 popd
 
 # Auto-discover all .bib files and create bibliography arguments
@@ -13,5 +29,9 @@ for bibfile in *.bib; do
     fi
 done
 
-# Build presentation with pandoc
-pandoc -s --mathml -i -t revealjs --embed-resources --standalone --citeproc $bib_args --csl=/usr/share/texlive/texmf-dist/tex/latex/citation-style-language/styles/ieee.csl presentation.md -o presentation.html
+embed_flag=""
+if $EMBED; then
+	embed_flag="--embed-resources"
+fi
+
+pandoc -s --mathml -i -t revealjs $embed_flag --standalone --citeproc $bib_args --csl=/usr/share/texlive/texmf-dist/tex/latex/citation-style-language/styles/ieee.csl presentation.md -o presentation.html
