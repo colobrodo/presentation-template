@@ -19,16 +19,24 @@ done
 
 for ipefile in *.ipe; do
 	name=${ipefile%.*}
-	svgfile="$name.svg"
-	
-	# Check if we need to render:
-	# - Force mode is enabled, OR
-	# - SVG doesn't exist, OR
-	# - IPE file is newer than SVG
-	if $FORCE || [ ! -f "$svgfile" ] || [ "$ipefile" -nt "$svgfile" ]; then
-		echo "Rendering $ipefile"
-		iperender -svg "$ipefile" "$svgfile"
-	else
-		echo "Skipping $ipefile (up to date)"
-	fi
+	numpages=$(grep -c '<page' "$ipefile")
+
+	for ((page=1; page<=numpages; page++)); do
+		if [ "$numpages" -eq 1 ]; then
+			svgfile="$name.svg"
+		else
+			svgfile="$name-page$page.svg"
+		fi
+
+		# Check if we need to render:
+		# - Force mode is enabled, OR
+		# - SVG doesn't exist, OR
+		# - IPE file is newer than SVG
+		if $FORCE || [ ! -f "$svgfile" ] || [ "$ipefile" -nt "$svgfile" ]; then
+			echo "Rendering $ipefile (page $page)"
+			iperender -svg -page "$page" "$ipefile" "$svgfile"
+		else
+			echo "Skipping $ipefile (page $page, up to date)"
+		fi
+	done
 done
